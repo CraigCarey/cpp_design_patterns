@@ -8,3 +8,6 @@ A Class should have a single reason to change
 It should have a primary responsibility and not take on other responsibilities
 ### O - Open Closed
 Systems should be open to extension, but closed to modification
+### L - Liskov Substitution
+ Subtypes should be immediately substitutable for their basetypes
+ i.e. if a square inherits from rectangle, it should be useable wherever a rectangle can be used
