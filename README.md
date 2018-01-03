@@ -38,3 +38,9 @@ Specifies the best way to form dependencies between objects
 2. Abstractions should not depend on details
   
    Details should depend on abstractions
+
+
+## Other Patterns
+
+### Builder
+When piecewise object construction is complicated, provide an API for doing it succinctly
