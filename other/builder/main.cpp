@@ -12,12 +12,12 @@
 
 using namespace std;
 
-struct HtmlElement
-{
+class HtmlElement {
+
+    friend class HtmlBuilder;
     string name_;
     string text_;
     vector<HtmlElement> elements_;
-
     const size_t indent_size = 4;
 
     HtmlElement() {}
@@ -25,36 +25,51 @@ struct HtmlElement
     HtmlElement(const string &name, const string &text)
             : name_(name), text_(text) {}
 
-    string str(int indent = 0) const
-    {
+public:
+
+    string str(int indent = 0) const {
         ostringstream oss;
         string indentation(indent_size * indent, ' ');
         oss << indentation << "<" << name_ << ">" << endl;
-        if(text_.size() > 0)
-            oss << string(indent_size*(indent + 1), ' ') << text_ << endl;
-        for (const auto& e : elements_)
-            oss << e.str(indent+1);
+        if (text_.size() > 0)
+            oss << string(indent_size * (indent + 1), ' ') << text_ << endl;
+        for (const auto &e : elements_)
+            oss << e.str(indent + 1);
         oss << indentation << "</" << name_ << ">" << endl;
         return oss.str();
     }
+
+    static HtmlBuilder build(string root_name) {
+        return root_name;
+    }
 };
 
-struct HtmlBuilder
-{
+class HtmlBuilder {
+
     HtmlElement root_;
 
+public:
     HtmlBuilder(string root_name) {
         root_.name_ = root_name;
     }
 
-    void add_child(string child_name, string child_text) {
+    // returning *this allows chaining of commands, for a fluent interface
+    HtmlBuilder &add_child(string child_name, string child_text) {
         HtmlElement e{child_name, child_text};
         root_.elements_.emplace_back(e);
+        return *this;
     }
 
-    string str() const
-    {
+    HtmlElement build() {
+        return root_;
+    }
+
+    string str() const {
         return root_.str();
+    }
+
+    operator HtmlElement() const {
+        return root_;
     }
 };
 
@@ -75,9 +90,16 @@ int main() {
 //    oss << "</ul>" << endl;
 //    cout << oss.str();
 
-    HtmlBuilder builder{"ul"};
-    builder.add_child("li", "hello");
-    builder.add_child("li", "world");
+//    // Standard Builder
+//    HtmlBuilder builder{"ul"};
+//    builder.add_child("li", "hello");
+//    builder.add_child("li", "world");
+//    cout << builder.str() << endl;
 
-    cout << builder.str() << endl;
+//    // Fluent Builder
+//    HtmlBuilder builder{"ul"};
+//    builder.add_child("li", "hello").add_child("li", "world");
+//    cout << builder.str() << endl;
+
+//    HtmlElement elem = HtmlElement::create("").add_child().build;
 }
