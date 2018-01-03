@@ -44,3 +44,11 @@ Specifies the best way to form dependencies between objects
 
 ### Builder
 When piecewise object construction is complicated, provide an API for doing it succinctly
+
+A builder is a separate component for building an object
+
+Can either give builder a constructor or return it via a static function
+
+To make a builder fluid retutn *this*
+
+Different facets of an object can ve built with different builders working in tandem via a base class
