@@ -1,105 +1,69 @@
-/*
- * Some objects are simple and can be created in a single constructor call
- * Other objects require a lot of ceremony to create
- * Having an object with 10 constructor arguments is not productive
- * Instead, opt for piecewise construction
- * Builder provides an API for constructing an object step-by-step
- */
-
 #include <iostream>
-#include <sstream>
 #include <vector>
 
 using namespace std;
 
-class HtmlElement {
+struct Tag {
+    string name;
+    string text;
+    vector<Tag> children;
+    vector<pair<string,string>> attributes;
 
-    friend class HtmlBuilder;
-    string name_;
-    string text_;
-    vector<HtmlElement> elements_;
-    const size_t indent_size = 4;
+    friend ostream& operator<<(ostream& os, const Tag& tag)
+    {
+        os << "<" << tag.name;
 
-    HtmlElement() {}
+        for (const auto& att : tag.attributes)
+            os << " " << att.first << "=\"" << att.second << "\"";
 
-    HtmlElement(const string &name, const string &text)
-            : name_(name), text_(text) {}
+        if (tag.children.size() == 0 && tag.text.length() == 0)
+        {
+            os << "/>" << endl;
+        }
+        else
+        {
+            os << ">" << endl;
 
+            if (tag.text.length())
+                os << tag.text << endl;
+
+            for (const auto& child : tag.children)
+                os << child;
+
+            os << "</" << tag.name << ">" << endl;
+        }
+        return os;
+    }
+
+protected:
 public:
-
-    string str(int indent = 0) const {
-        ostringstream oss;
-        string indentation(indent_size * indent, ' ');
-        oss << indentation << "<" << name_ << ">" << endl;
-        if (text_.size() > 0)
-            oss << string(indent_size * (indent + 1), ' ') << text_ << endl;
-        for (const auto &e : elements_)
-            oss << e.str(indent + 1);
-        oss << indentation << "</" << name_ << ">" << endl;
-        return oss.str();
-    }
-
-    static HtmlBuilder build(string root_name) {
-        return root_name;
-    }
+    Tag(const string &name, const string &text) : name(name), text(text) {}
+    Tag(const string &name, const vector<Tag> &children) : name(name), children(children) {}
 };
 
-class HtmlBuilder {
+struct P : Tag
+{
+    P(const string &text) : Tag("P", text) {}
 
-    HtmlElement root_;
+    P(initializer_list<Tag> children)
+            : Tag { "P", children } {}
+};
 
-public:
-    HtmlBuilder(string root_name) {
-        root_.name_ = root_name;
-    }
-
-    // returning *this allows chaining of commands, for a fluent interface
-    HtmlBuilder &add_child(string child_name, string child_text) {
-        HtmlElement e{child_name, child_text};
-        root_.elements_.emplace_back(e);
-        return *this;
-    }
-
-    HtmlElement build() {
-        return root_;
-    }
-
-    string str() const {
-        return root_.str();
-    }
-
-    operator HtmlElement() const {
-        return root_;
+struct IMG : Tag
+{
+    explicit IMG(const string &url)
+    : Tag { "img", "" }
+    {
+        attributes.emplace_back(make_pair("src", url));
     }
 };
 
 int main() {
-//    // Without using a builder...
-//    string text = "hello";
-//    string output;
-//    output += "<p>";
-//    output += text;
-//    output += "<p>";
-//    cout << output << endl;
-//
-//    string words[] = {"hello", "world"};
-//    ostringstream oss;
-//    oss << "<ul>" << endl;
-//    for (string w : words)
-//        oss << "<li>" << w << "</li>\n";
-//    oss << "</ul>" << endl;
-//    cout << oss.str();
+    cout <<
 
-//    // Standard Builder
-//    HtmlBuilder builder{"ul"};
-//    builder.add_child("li", "hello");
-//    builder.add_child("li", "world");
-//    cout << builder.str() << endl;
+         P {
+                 IMG { "http://pokemon.com/pikachu.png" }
+         }
 
-//    // Fluent Builder
-//    HtmlBuilder builder{"ul"};
-//    builder.add_child("li", "hello").add_child("li", "world");
-//    cout << builder.str() << endl;
-
-//    HtmlElement elem = HtmlElement::create("").add_child().build;
+    << endl;
 }
